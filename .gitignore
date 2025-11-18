@@ -1,0 +1,40 @@
+# Go modules and binaries
+/bin/
+/build/
+/*.exe
+/*.exe~
+/*.dll
+/*.so
+/*.dylib
+/vendor/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+*.out
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+*.tar
+docker-compose.override.yml
+
+# Setup script (optional to ignore if you don't want it in git)
+scripts/setup.sh
+
+# MongoDB local data (if any)
+data/
+
