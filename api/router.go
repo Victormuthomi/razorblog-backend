@@ -27,34 +27,44 @@ func RegisterRoutes(r *gin.Engine, client *mongo.Client) {
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "RazorBlog Backend Running"})
 	})
+// HealthCheck godoc
+// @Summary Health check
+// @Description Checks if the server and MongoDB are running with retry
+// @Tags Health
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 503 {object} map[string]string
+// @Router /health [get]
+r.GET("/health", func(c *gin.Context) {
+	const maxRetries = 3
+	const retryDelay = time.Second
 
-	// ===== Health Check =====
-	// @Summary Health check
-	// @Description Checks server and MongoDB connection
-	// @Tags Health
-	// @Success 200 {object} map[string]string "DB connected"
-	// @Failure 503 {object} map[string]string "DB disconnected"
-	// @Router /health [get]
-	r.GET("/health", func(c *gin.Context) {
+	dbStatus := "ok"
+	httpStatus := http.StatusOK
+
+	for i := 0; i < maxRetries; i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
+		err := client.Ping(ctx, nil)
+		cancel()
 
-		if err := client.Ping(ctx, nil); err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"status": "fail",
-				"db":     "disconnected",
-				"error":  err.Error(),
-			})
-			return
+		if err == nil {
+			dbStatus = "ok"
+			httpStatus = http.StatusOK
+			break
+		} else {
+			dbStatus = "disconnected"
+			httpStatus = http.StatusServiceUnavailable
+			time.Sleep(retryDelay)
 		}
+	}
 
-		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
-			"db":     "connected",
-		})
+	c.JSON(httpStatus, gin.H{
+		"server": "ok",
+		"db":     dbStatus,
 	})
+})
 
-	// ===== Author Routes =====
+		// ===== Author Routes =====
 	db := client.Database("razorblog")
 	authorRepo := repository.NewAuthorRepository(db)
 	authorHandler := handler.NewAuthorHandler(authorRepo)
@@ -92,6 +102,11 @@ func RegisterRoutes(r *gin.Engine, client *mongo.Client) {
 		// Delete blog
 		blogProtected.DELETE("/:id", blogHandler.DeleteBlog)
 	}
+
+  
+    // ❤️ New: Like/Unlike blog endpoints
+    blogProtected.PATCH("/:id/like", blogHandler.LikeBlog)
+    blogProtected.PATCH("/:id/unlike", blogHandler.UnlikeBlog)
 
 	//  Comment routes
   // ===== Comment Routes =====

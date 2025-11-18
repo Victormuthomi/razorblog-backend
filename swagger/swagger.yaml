@@ -14,6 +14,11 @@ definitions:
         type: string
       image_url:
         type: string
+      likes:
+        description: '❤️ New feature: store user IDs who liked this blog'
+        items:
+          type: string
+        type: array
       readers:
         type: integer
       title:
@@ -515,6 +520,88 @@ paths:
               type: string
             type: object
       summary: Update a blog
+      tags:
+      - Blogs
+  /blogs/{id}/like:
+    patch:
+      description: Adds the logged-in user's like to a blog
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Like a blog
+      tags:
+      - Blogs
+  /blogs/{id}/unlike:
+    patch:
+      description: Removes the logged-in user's like from a blog
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Unlike a blog
       tags:
       - Blogs
   /comments:

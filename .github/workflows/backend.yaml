@@ -1,0 +1,41 @@
+name: CI/CD - RazorBlog Backend
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and run with Docker Compose
+        run: |
+          docker-compose down --remove-orphans
+          docker-compose up --build -d
+
+      - name: Wait for backend to start
+        run: sleep 10
+
+      - name: Check backend container status
+        run: docker ps
+
+      - name: Health check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health)
+          if [ "$STATUS" -ne 200 ]; then
+            echo "❌ Health check failed with status $STATUS"
+            # Stop and remove failed container
+            docker-compose down --remove-orphans
+            exit 1
+          else
+            echo "✅ Health check passed"

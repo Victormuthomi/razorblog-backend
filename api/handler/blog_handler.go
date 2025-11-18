@@ -181,3 +181,82 @@ func (h *BlogHandler) ListBlogs(c *gin.Context) {
 	c.JSON(http.StatusOK, blogs)
 }
 
+
+// LikeBlog godoc
+// @Summary Like a blog
+// @Description Adds the logged-in user's like to a blog
+// @Tags Blogs
+// @Produce json
+// @Param id path string true "Blog ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /blogs/{id}/like [patch]
+func (h *BlogHandler) LikeBlog(c *gin.Context) {
+	id := c.Param("id")
+	blogID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid blog ID"})
+		return
+	}
+
+	userIDStr, exists := c.Get("author_id") // assuming same auth middleware
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userID, err := primitive.ObjectIDFromHex(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	if err := h.repo.LikeBlog(c, blogID, userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "blog liked"})
+}
+
+// UnlikeBlog godoc
+// @Summary Unlike a blog
+// @Description Removes the logged-in user's like from a blog
+// @Tags Blogs
+// @Produce json
+// @Param id path string true "Blog ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /blogs/{id}/unlike [patch]
+func (h *BlogHandler) UnlikeBlog(c *gin.Context) {
+	id := c.Param("id")
+	blogID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid blog ID"})
+		return
+	}
+
+	userIDStr, exists := c.Get("author_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userID, err := primitive.ObjectIDFromHex(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	if err := h.repo.UnlikeBlog(c, blogID, userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "blog unliked"})
+}
+

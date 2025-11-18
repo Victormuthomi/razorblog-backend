@@ -83,3 +83,23 @@ func (r *BlogRepository) IncrementReaders(ctx context.Context, id primitive.Obje
 	return err
 }
 
+// LikeBlog adds a user ID to the blog's Likes array
+func (r *BlogRepository) LikeBlog(ctx context.Context, blogID, userID primitive.ObjectID) error {
+	_, err := r.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": blogID},
+		bson.M{"$addToSet": bson.M{"likes": userID}}, // prevents duplicate likes
+	)
+	return err
+}
+
+// UnlikeBlog removes a user ID from the blog's Likes array
+func (r *BlogRepository) UnlikeBlog(ctx context.Context, blogID, userID primitive.ObjectID) error {
+	_, err := r.collection.UpdateOne(
+		ctx,
+		bson.M{"_id": blogID},
+		bson.M{"$pull": bson.M{"likes": userID}},
+	)
+	return err
+}
+

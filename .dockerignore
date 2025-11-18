@@ -1,0 +1,33 @@
+# Go build artifacts
+bin/
+tmp/
+*.exe
+*.test
+*.out
+
+# Vendor directory (if not used in build)
+vendor/
+
+# OS / IDE files
+.DS_Store
+*.swp
+*.swo
+*.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Git
+.git
+.gitignore
+
+# Node / frontend (if any)
+node_modules/
+dist/
+
+# Environment files (optional, already copied explicitly)
+.env.local
+.env.development
+.env.test
+
