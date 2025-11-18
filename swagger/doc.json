@@ -1,0 +1,866 @@
+{
+  "schemes": ["http"],
+  "swagger": "2.0",
+  "info": {
+    "description": "Backend API for RazorBlog including Authors, Blogs, Comments, Shares",
+    "title": "RazorBlog API",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "name": "RazorBlog Support",
+      "url": "http://razorblog.io",
+      "email": "support@razorblog.io"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "1.0"
+  },
+  "host": "localhost:8080",
+  "basePath": "/",
+  "paths": {
+    "/authors/login": {
+      "post": {
+        "description": "Logs in an author and returns JWT token",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Authors"],
+        "summary": "Author login",
+        "parameters": [
+          {
+            "description": "Login credentials (email, password)",
+            "name": "credentials",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authors/register": {
+      "post": {
+        "description": "Creates a new author account",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Authors"],
+        "summary": "Register a new author",
+        "parameters": [
+          {
+            "description": "Author info (name, email, phone, password)",
+            "name": "author",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authors/{id}": {
+      "get": {
+        "description": "Retrieves an author by their ID",
+        "produces": ["application/json"],
+        "tags": ["Authors"],
+        "summary": "Get author by ID",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Author ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Updates an author's info",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Authors"],
+        "summary": "Update an author",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Author ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Updated fields (name, email, phone, password)",
+            "name": "author",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Deletes an author by ID",
+        "produces": ["application/json"],
+        "tags": ["Authors"],
+        "summary": "Delete an author",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Author ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blogs": {
+      "get": {
+        "description": "Returns a list of blogs with pagination support",
+        "produces": ["application/json"],
+        "tags": ["Blogs"],
+        "summary": "List blogs",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 10,
+            "description": "Limit number of blogs",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "description": "Number of blogs to skip",
+            "name": "skip",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/blog.Blog"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Creates a new blog post for the logged-in author",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Blogs"],
+        "summary": "Create a new blog",
+        "parameters": [
+          {
+            "description": "Blog info (title, content, image_url, category)",
+            "name": "blog",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/blog.Blog"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blogs/{blog_id}/comments": {
+      "get": {
+        "description": "Returns a paginated list of comments for a specific blog",
+        "produces": ["application/json"],
+        "tags": ["Comments"],
+        "summary": "List comments for a blog",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Blog ID",
+            "name": "blog_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 10,
+            "description": "Limit number of comments",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "description": "Number of comments to skip",
+            "name": "skip",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/models.Comment"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blogs/{blog_id}/shares": {
+      "get": {
+        "description": "Returns a list of shares for a specific blog post",
+        "produces": ["application/json"],
+        "tags": ["Shares"],
+        "summary": "List shares for a blog",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Blog ID",
+            "name": "blog_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/models.Share"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blogs/{id}": {
+      "get": {
+        "description": "Retrieves a blog by its ID and increments readers count",
+        "produces": ["application/json"],
+        "tags": ["Blogs"],
+        "summary": "Get a blog by ID",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Blog ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/blog.Blog"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Updates blog details by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Blogs"],
+        "summary": "Update a blog",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Blog ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Updated blog fields (title, content, image_url, category)",
+            "name": "blog",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/blog.Blog"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Deletes a blog by its ID",
+        "produces": ["application/json"],
+        "tags": ["Blogs"],
+        "summary": "Delete a blog",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Blog ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments": {
+      "post": {
+        "description": "Adds a comment to a blog post",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Comments"],
+        "summary": "Create a new comment",
+        "parameters": [
+          {
+            "description": "Comment info (blog_id, username, content)",
+            "name": "comment",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/models.Comment"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}/like": {
+      "post": {
+        "description": "Adds a like from a user to a specific comment",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Comments"],
+        "summary": "Like a comment",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Comment ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Username liking the comment",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/models.Comment"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shares": {
+      "post": {
+        "description": "Records a share of a blog post on a platform",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Shares"],
+        "summary": "Create a new share",
+        "parameters": [
+          {
+            "description": "Share info (blog_id, platform)",
+            "name": "share",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/models.Share"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "blog.Blog": {
+      "type": "object",
+      "properties": {
+        "author_id": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "image_url": {
+          "type": "string"
+        },
+        "readers": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    },
+    "models.Comment": {
+      "type": "object",
+      "properties": {
+        "blog_id": {
+          "description": "Blog this comment belongs to",
+          "type": "string"
+        },
+        "content": {
+          "description": "Comment text",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "Timestamp",
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "liked_by": {
+          "description": "Track users who liked this comment (to ensure one like per person)",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "likes": {
+          "description": "Number of likes",
+          "type": "integer"
+        },
+        "username": {
+          "description": "Name of the commentor",
+          "type": "string"
+        }
+      }
+    },
+    "models.Share": {
+      "type": "object",
+      "properties": {
+        "blog_id": {
+          "description": "Blog being shared",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "Timestamp of the share",
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "platform": {
+          "description": "e.g., Twitter, Facebook",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

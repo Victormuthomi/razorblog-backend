@@ -9,6 +9,7 @@ import (
     "github.com/gin-gonic/gin"
     ginSwagger "github.com/swaggo/gin-swagger"
     swaggerFiles "github.com/swaggo/files"
+  _ "razorblog-backend/swagger"
 )
 
 // @title RazorBlog API

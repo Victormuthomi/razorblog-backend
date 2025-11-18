@@ -20,6 +20,17 @@ func NewShareHandler(repo *repository.ShareRepository) *ShareHandler {
 	return &ShareHandler{repo: repo}
 }
 
+// CreateShare godoc
+// @Summary Create a new share
+// @Description Records a share of a blog post on a platform
+// @Tags Shares
+// @Accept json
+// @Produce json
+// @Param share body map[string]string true "Share info (blog_id, platform)"
+// @Success 201 {object} models.Share
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /shares [post]
 func (h *ShareHandler) CreateShare(c *gin.Context) {
 	var s models.Share
 	if err := c.ShouldBindJSON(&s); err != nil {
@@ -41,6 +52,16 @@ func (h *ShareHandler) CreateShare(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
+// ListShares godoc
+// @Summary List shares for a blog
+// @Description Returns a list of shares for a specific blog post
+// @Tags Shares
+// @Produce json
+// @Param blog_id path string true "Blog ID"
+// @Success 200 {array} models.Share
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /blogs/{blog_id}/shares [get]
 func (h *ShareHandler) ListShares(c *gin.Context) {
 	blogIDStr := c.Param("blog_id")
 	blogID, err := primitive.ObjectIDFromHex(blogIDStr)

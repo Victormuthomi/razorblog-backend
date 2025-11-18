@@ -1,0 +1,629 @@
+basePath: /
+definitions:
+  blog.Blog:
+    properties:
+      author_id:
+        type: string
+      category:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      readers:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Comment:
+    properties:
+      blog_id:
+        description: Blog this comment belongs to
+        type: string
+      content:
+        description: Comment text
+        type: string
+      created_at:
+        description: Timestamp
+        type: string
+      id:
+        type: string
+      liked_by:
+        description: Track users who liked this comment (to ensure one like per person)
+        items:
+          type: string
+        type: array
+      likes:
+        description: Number of likes
+        type: integer
+      username:
+        description: Name of the commentor
+        type: string
+    type: object
+  models.Share:
+    properties:
+      blog_id:
+        description: Blog being shared
+        type: string
+      created_at:
+        description: Timestamp of the share
+        type: string
+      id:
+        type: string
+      platform:
+        description: e.g., Twitter, Facebook
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@razorblog.io
+    name: RazorBlog Support
+    url: http://razorblog.io
+  description: Backend API for RazorBlog including Authors, Blogs, Comments, Shares
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: RazorBlog API
+  version: "1.0"
+paths:
+  /authors/{id}:
+    delete:
+      description: Deletes an author by ID
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an author
+      tags:
+      - Authors
+    get:
+      description: Retrieves an author by their ID
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get author by ID
+      tags:
+      - Authors
+    put:
+      consumes:
+      - application/json
+      description: Updates an author's info
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated fields (name, email, phone, password)
+        in: body
+        name: author
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an author
+      tags:
+      - Authors
+  /authors/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in an author and returns JWT token
+      parameters:
+      - description: Login credentials (email, password)
+        in: body
+        name: credentials
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Author login
+      tags:
+      - Authors
+  /authors/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new author account
+      parameters:
+      - description: Author info (name, email, phone, password)
+        in: body
+        name: author
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new author
+      tags:
+      - Authors
+  /blogs:
+    get:
+      description: Returns a list of blogs with pagination support
+      parameters:
+      - default: 10
+        description: Limit number of blogs
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of blogs to skip
+        in: query
+        name: skip
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/blog.Blog'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List blogs
+      tags:
+      - Blogs
+    post:
+      consumes:
+      - application/json
+      description: Creates a new blog post for the logged-in author
+      parameters:
+      - description: Blog info (title, content, image_url, category)
+        in: body
+        name: blog
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/blog.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new blog
+      tags:
+      - Blogs
+  /blogs/{blog_id}/comments:
+    get:
+      description: Returns a paginated list of comments for a specific blog
+      parameters:
+      - description: Blog ID
+        in: path
+        name: blog_id
+        required: true
+        type: string
+      - default: 10
+        description: Limit number of comments
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of comments to skip
+        in: query
+        name: skip
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Comment'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List comments for a blog
+      tags:
+      - Comments
+  /blogs/{blog_id}/shares:
+    get:
+      description: Returns a list of shares for a specific blog post
+      parameters:
+      - description: Blog ID
+        in: path
+        name: blog_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Share'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List shares for a blog
+      tags:
+      - Shares
+  /blogs/{id}:
+    delete:
+      description: Deletes a blog by its ID
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a blog
+      tags:
+      - Blogs
+    get:
+      description: Retrieves a blog by its ID and increments readers count
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/blog.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a blog by ID
+      tags:
+      - Blogs
+    put:
+      consumes:
+      - application/json
+      description: Updates blog details by ID
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated blog fields (title, content, image_url, category)
+        in: body
+        name: blog
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/blog.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a blog
+      tags:
+      - Blogs
+  /comments:
+    post:
+      consumes:
+      - application/json
+      description: Adds a comment to a blog post
+      parameters:
+      - description: Comment info (blog_id, username, content)
+        in: body
+        name: comment
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new comment
+      tags:
+      - Comments
+  /comments/{id}/like:
+    post:
+      consumes:
+      - application/json
+      description: Adds a like from a user to a specific comment
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Username liking the comment
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Like a comment
+      tags:
+      - Comments
+  /shares:
+    post:
+      consumes:
+      - application/json
+      description: Records a share of a blog post on a platform
+      parameters:
+      - description: Share info (blog_id, platform)
+        in: body
+        name: share
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Share'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new share
+      tags:
+      - Shares
+schemes:
+- http
+swagger: "2.0"

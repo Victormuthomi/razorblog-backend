@@ -39,38 +39,53 @@ const docTemplate = `{
                 "summary": "Author login",
                 "parameters": [
                     {
-                        "description": "Login info",
+                        "description": "Login credentials (email, password)",
                         "name": "credentials",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthorLoginRequest"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "JWT token",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.TokenResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
-                        "description": "bad request",
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "401": {
-                        "description": "invalid credentials",
+                        "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
-                        "description": "internal error",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -78,7 +93,7 @@ const docTemplate = `{
         },
         "/authors/register": {
             "post": {
-                "description": "Creates a new author with hashed password",
+                "description": "Creates a new author account",
                 "consumes": [
                     "application/json"
                 ],
@@ -91,38 +106,51 @@ const docTemplate = `{
                 "summary": "Register a new author",
                 "parameters": [
                     {
-                        "description": "Author info",
+                        "description": "Author info (name, email, phone, password)",
                         "name": "author",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthorRegisterRequest"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created author",
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthorResponse"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "bad request",
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "409": {
-                        "description": "email already registered",
+                        "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
-                        "description": "internal error",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -130,19 +158,14 @@ const docTemplate = `{
         },
         "/authors/{id}": {
             "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Retrieves author by ID",
+                "description": "Retrieves an author by their ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Authors"
                 ],
-                "summary": "Get author details",
+                "summary": "Get author by ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -154,32 +177,34 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Author data",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthorResponse"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
-                        "description": "invalid id",
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
-                        "description": "author not found",
+                        "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Updates author data (password is hashed if provided)",
+                "description": "Updates an author's info",
                 "consumes": [
                     "application/json"
                 ],
@@ -189,7 +214,7 @@ const docTemplate = `{
                 "tags": [
                     "Authors"
                 ],
-                "summary": "Update author",
+                "summary": "Update an author",
                 "parameters": [
                     {
                         "type": "string",
@@ -199,50 +224,54 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Updated author info",
+                        "description": "Updated fields (name, email, phone, password)",
                         "name": "author",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthorRegisterRequest"
+                            "type": "object"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "message",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.MessageResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
-                        "description": "invalid id",
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
-                        "description": "internal error",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Deletes author by ID",
+                "description": "Deletes an author by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Authors"
                 ],
-                "summary": "Delete author",
+                "summary": "Delete an author",
                 "parameters": [
                     {
                         "type": "string",
@@ -254,21 +283,30 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "message",
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.MessageResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
-                        "description": "invalid id",
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
-                        "description": "internal error",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -276,7 +314,7 @@ const docTemplate = `{
         },
         "/blogs": {
             "get": {
-                "description": "List blogs with optional pagination (public)",
+                "description": "Returns a list of blogs with pagination support",
                 "produces": [
                     "application/json"
                 ],
@@ -287,13 +325,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Limit",
+                        "default": 10,
+                        "description": "Limit number of blogs",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Skip",
+                        "default": 0,
+                        "description": "Number of blogs to skip",
                         "name": "skip",
                         "in": "query"
                     }
@@ -302,24 +342,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.BlogsResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/blog.Blog"
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Create a new blog post (protected)",
+                "description": "Creates a new blog post for the logged-in author",
                 "consumes": [
                     "application/json"
                 ],
@@ -329,15 +370,18 @@ const docTemplate = `{
                 "tags": [
                     "Blogs"
                 ],
-                "summary": "Create a blog",
+                "summary": "Create a new blog",
                 "parameters": [
                     {
-                        "description": "Blog payload",
+                        "description": "Blog info (title, content, image_url, category)",
                         "name": "blog",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.BlogRequest"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 ],
@@ -345,19 +389,148 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handler.BlogResponse"
+                            "$ref": "#/definitions/blog.Blog"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blogs/{blog_id}/comments": {
+            "get": {
+                "description": "Returns a paginated list of comments for a specific blog",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comments"
+                ],
+                "summary": "List comments for a blog",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Blog ID",
+                        "name": "blog_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit number of comments",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Number of comments to skip",
+                        "name": "skip",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Comment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blogs/{blog_id}/shares": {
+            "get": {
+                "description": "Returns a list of shares for a specific blog post",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Shares"
+                ],
+                "summary": "List shares for a blog",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Blog ID",
+                        "name": "blog_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Share"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -365,7 +538,7 @@ const docTemplate = `{
         },
         "/blogs/{id}": {
             "get": {
-                "description": "Get blog details by ID (public)",
+                "description": "Retrieves a blog by its ID and increments readers count",
                 "produces": [
                     "application/json"
                 ],
@@ -386,30 +559,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.BlogResponse"
+                            "$ref": "#/definitions/blog.Blog"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Update a blog post (protected, author only)",
+                "description": "Updates blog details by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -429,12 +603,15 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Blog payload",
+                        "description": "Updated blog fields (title, content, image_url, category)",
                         "name": "blog",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.BlogRequest"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 ],
@@ -442,36 +619,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.BlogResponse"
+                            "$ref": "#/definitions/blog.Blog"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             },
             "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Delete a blog post (protected, author only)",
+                "description": "Deletes a blog by its ID",
                 "produces": [
                     "application/json"
                 ],
@@ -492,25 +664,28 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.MessageResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -518,7 +693,7 @@ const docTemplate = `{
         },
         "/comments": {
             "post": {
-                "description": "Create a new comment for a blog",
+                "description": "Adds a comment to a blog post",
                 "consumes": [
                     "application/json"
                 ],
@@ -528,15 +703,18 @@ const docTemplate = `{
                 "tags": [
                     "Comments"
                 ],
-                "summary": "Create a comment",
+                "summary": "Create a new comment",
                 "parameters": [
                     {
-                        "description": "Comment payload",
+                        "description": "Comment info (blog_id, username, content)",
                         "name": "comment",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.CommentRequest"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 ],
@@ -544,72 +722,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handler.CommentResponse"
+                            "$ref": "#/definitions/models.Comment"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/comments/{blog_id}": {
-            "get": {
-                "description": "List comments for a given blog with optional pagination",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Comments"
-                ],
-                "summary": "List comments for a blog",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Blog ID",
-                        "name": "blog_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Limit (default 10)",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Skip (default 0)",
-                        "name": "skip",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.CommentsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -617,7 +748,7 @@ const docTemplate = `{
         },
         "/comments/{id}/like": {
             "post": {
-                "description": "Like a comment by username. One like per username only.",
+                "description": "Adds a like from a user to a specific comment",
                 "consumes": [
                     "application/json"
                 ],
@@ -642,7 +773,10 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.LikeCommentRequest"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 ],
@@ -650,19 +784,16 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.CommentResponse"
+                            "$ref": "#/definitions/models.Comment"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -670,7 +801,7 @@ const docTemplate = `{
         },
         "/shares": {
             "post": {
-                "description": "Record a share event for a blog",
+                "description": "Records a share of a blog post on a platform",
                 "consumes": [
                     "application/json"
                 ],
@@ -680,15 +811,18 @@ const docTemplate = `{
                 "tags": [
                     "Shares"
                 ],
-                "summary": "Create a blog share",
+                "summary": "Create a new share",
                 "parameters": [
                     {
-                        "description": "Share payload",
+                        "description": "Share info (blog_id, platform)",
                         "name": "share",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.ShareRequest"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 ],
@@ -696,60 +830,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/handler.ShareResponse"
+                            "$ref": "#/definitions/models.Share"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/shares/{blog_id}": {
-            "get": {
-                "description": "List all share events for a specific blog",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Shares"
-                ],
-                "summary": "List shares for a blog",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Blog ID",
-                        "name": "blog_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.SharesResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/handler.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -789,262 +888,58 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.AuthorDTO": {
+        "models.Comment": {
             "type": "object",
             "properties": {
-                "avatar_url": {
-                    "type": "string",
-                    "example": "https://example.com/avatar.png"
+                "blog_id": {
+                    "description": "Blog this comment belongs to",
+                    "type": "string"
+                },
+                "content": {
+                    "description": "Comment text",
+                    "type": "string"
                 },
                 "created_at": {
+                    "description": "Timestamp",
                     "type": "string"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "john@example.com"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "64f0c3b9f1234abcd5678ef0"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "John Doe"
-                },
-                "phone": {
-                    "type": "string",
-                    "example": "+1234567890"
-                },
-                "updated_at": {
                     "type": "string"
-                }
-            }
-        },
-        "handler.AuthorLoginRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john@example.com"
                 },
-                "password": {
-                    "type": "string",
-                    "example": "secret123"
-                }
-            }
-        },
-        "handler.AuthorRegisterRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "john@example.com"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "John Doe"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "secret123"
-                },
-                "phone": {
-                    "type": "string",
-                    "example": "+1234567890"
-                }
-            }
-        },
-        "handler.AuthorResponse": {
-            "type": "object",
-            "properties": {
-                "author": {
-                    "$ref": "#/definitions/handler.AuthorDTO"
-                }
-            }
-        },
-        "handler.BlogRequest": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "type": "string",
-                    "example": "Tech"
-                },
-                "content": {
-                    "type": "string",
-                    "example": "This is the content of the blog"
-                },
-                "image_url": {
-                    "type": "string",
-                    "example": "https://example.com/image.jpg"
-                },
-                "title": {
-                    "type": "string",
-                    "example": "My Blog Post"
-                }
-            }
-        },
-        "handler.BlogResponse": {
-            "type": "object",
-            "properties": {
-                "blog": {
-                    "$ref": "#/definitions/blog.Blog"
-                }
-            }
-        },
-        "handler.BlogsResponse": {
-            "type": "object",
-            "properties": {
-                "blogs": {
+                "liked_by": {
+                    "description": "Track users who liked this comment (to ensure one like per person)",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/blog.Blog"
+                        "type": "string"
                     }
-                }
-            }
-        },
-        "handler.CommentDTO": {
-            "type": "object",
-            "properties": {
-                "blog_id": {
-                    "type": "string",
-                    "example": "64f8c2d3a2b9b7e1f2345678"
-                },
-                "content": {
-                    "type": "string",
-                    "example": "This is a comment"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "64f8c2d3a2b9b7e1f2345678"
                 },
                 "likes": {
-                    "type": "integer",
-                    "example": 5
+                    "description": "Number of likes",
+                    "type": "integer"
                 },
                 "username": {
-                    "type": "string",
-                    "example": "John Doe"
+                    "description": "Name of the commentor",
+                    "type": "string"
                 }
             }
         },
-        "handler.CommentRequest": {
+        "models.Share": {
             "type": "object",
             "properties": {
                 "blog_id": {
-                    "type": "string",
-                    "example": "64f8c2d3a2b9b7e1f2345678"
+                    "description": "Blog being shared",
+                    "type": "string"
                 },
-                "content": {
-                    "type": "string",
-                    "example": "This is a comment"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "John Doe"
-                }
-            }
-        },
-        "handler.CommentResponse": {
-            "type": "object",
-            "properties": {
-                "comment": {
-                    "$ref": "#/definitions/handler.CommentDTO"
-                }
-            }
-        },
-        "handler.CommentsResponse": {
-            "type": "object",
-            "properties": {
-                "comments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handler.CommentDTO"
-                    }
-                }
-            }
-        },
-        "handler.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "invalid blog ID"
-                }
-            }
-        },
-        "handler.LikeCommentRequest": {
-            "type": "object",
-            "properties": {
-                "username": {
-                    "type": "string",
-                    "example": "John Doe"
-                }
-            }
-        },
-        "handler.MessageResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "author updated"
-                }
-            }
-        },
-        "handler.ShareDTO": {
-            "type": "object",
-            "properties": {
-                "blog_id": {
-                    "type": "string",
-                    "example": "64f8c2d3a2b9b7e1f2345678"
+                "created_at": {
+                    "description": "Timestamp of the share",
+                    "type": "string"
                 },
                 "id": {
-                    "type": "string",
-                    "example": "64f8c2d3a2b9b7e1f2345678"
+                    "type": "string"
                 },
                 "platform": {
-                    "type": "string",
-                    "example": "Twitter"
-                }
-            }
-        },
-        "handler.ShareRequest": {
-            "type": "object",
-            "properties": {
-                "blog_id": {
-                    "type": "string",
-                    "example": "64f8c2d3a2b9b7e1f2345678"
-                },
-                "platform": {
-                    "type": "string",
-                    "example": "Twitter"
-                }
-            }
-        },
-        "handler.ShareResponse": {
-            "type": "object",
-            "properties": {
-                "share": {
-                    "$ref": "#/definitions/handler.ShareDTO"
-                }
-            }
-        },
-        "handler.SharesResponse": {
-            "type": "object",
-            "properties": {
-                "shares": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/handler.ShareDTO"
-                    }
-                }
-            }
-        },
-        "handler.TokenResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string",
-                    "example": "jwt-token-here"
+                    "description": "e.g., Twitter, Facebook",
+                    "type": "string"
                 }
             }
         }

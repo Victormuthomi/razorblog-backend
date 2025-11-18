@@ -1,0 +1,37 @@
+# ============================================================================
+# AIR CONFIG FOR RAZORBLOG-BACKEND — HOT RELOAD
+# ============================================================================
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# Where Air should build your app
+cmd = "go build -o ./tmp/main ./cmd/main.go"
+bin = "main"
+full_bin = "tmp/main"
+
+# Keep logs clean
+log = "air_errors.log"
+
+[log]
+time = true
+
+# What to watch for changes
+[watch]
+include = ["cmd", "api", "internal", "configs"]
+exclude = [
+  "tmp",
+  "swagger", # swagger regenerates files — ignore to avoid infinite loops
+  "vendor",
+  ".git",
+]
+
+# Restart delay to avoid too many rebuilds
+[dev]
+delay = 300
+
+# Environment variables (optional)
+[env]
+PORT = "8080"
+GIN_MODE = "debug"

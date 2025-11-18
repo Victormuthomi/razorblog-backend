@@ -20,6 +20,18 @@ func NewBlogHandler(repo *repository.BlogRepository) *BlogHandler {
 	return &BlogHandler{repo: repo}
 }
 
+// CreateBlog godoc
+// @Summary Create a new blog
+// @Description Creates a new blog post for the logged-in author
+// @Tags Blogs
+// @Accept json
+// @Produce json
+// @Param blog body map[string]string true "Blog info (title, content, image_url, category)"
+// @Success 201 {object} blog.Blog
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /blogs [post]
 func (h *BlogHandler) CreateBlog(c *gin.Context) {
 	var b blog.Blog
 	if err := c.ShouldBindJSON(&b); err != nil {
@@ -49,6 +61,16 @@ func (h *BlogHandler) CreateBlog(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
+// GetBlog godoc
+// @Summary Get a blog by ID
+// @Description Retrieves a blog by its ID and increments readers count
+// @Tags Blogs
+// @Produce json
+// @Param id path string true "Blog ID"
+// @Success 200 {object} blog.Blog
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /blogs/{id} [get]
 func (h *BlogHandler) GetBlog(c *gin.Context) {
 	id := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(id)
@@ -57,7 +79,6 @@ func (h *BlogHandler) GetBlog(c *gin.Context) {
 		return
 	}
 
-	// Increment readers count automatically
 	_ = h.repo.IncrementReaders(context.Background(), objID)
 
 	b, err := h.repo.GetByID(context.Background(), objID)
@@ -69,6 +90,18 @@ func (h *BlogHandler) GetBlog(c *gin.Context) {
 	c.JSON(http.StatusOK, b)
 }
 
+// UpdateBlog godoc
+// @Summary Update a blog
+// @Description Updates blog details by ID
+// @Tags Blogs
+// @Accept json
+// @Produce json
+// @Param id path string true "Blog ID"
+// @Param blog body map[string]string true "Updated blog fields (title, content, image_url, category)"
+// @Success 200 {object} blog.Blog
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /blogs/{id} [put]
 func (h *BlogHandler) UpdateBlog(c *gin.Context) {
 	id := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(id)
@@ -99,6 +132,16 @@ func (h *BlogHandler) UpdateBlog(c *gin.Context) {
 	c.JSON(http.StatusOK, updated)
 }
 
+// DeleteBlog godoc
+// @Summary Delete a blog
+// @Description Deletes a blog by its ID
+// @Tags Blogs
+// @Produce json
+// @Param id path string true "Blog ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /blogs/{id} [delete]
 func (h *BlogHandler) DeleteBlog(c *gin.Context) {
 	id := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(id)
@@ -112,9 +155,19 @@ func (h *BlogHandler) DeleteBlog(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "blog deleted"})
+	c.JSON(http.StatusOK, map[string]string{"message": "blog deleted"})
 }
 
+// ListBlogs godoc
+// @Summary List blogs
+// @Description Returns a list of blogs with pagination support
+// @Tags Blogs
+// @Produce json
+// @Param limit query int false "Limit number of blogs" default(10)
+// @Param skip query int false "Number of blogs to skip" default(0)
+// @Success 200 {array} blog.Blog
+// @Failure 500 {object} map[string]string
+// @Router /blogs [get]
 func (h *BlogHandler) ListBlogs(c *gin.Context) {
 	limit, _ := strconv.ParseInt(c.DefaultQuery("limit", "10"), 10, 64)
 	skip, _ := strconv.ParseInt(c.DefaultQuery("skip", "0"), 10, 64)
