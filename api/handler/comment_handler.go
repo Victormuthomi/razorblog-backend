@@ -21,16 +21,6 @@ func NewCommentHandler(repo *repository.CommentRepository) *CommentHandler {
 	return &CommentHandler{repo: repo}
 }
 
-// CreateComment godoc
-// @Summary Create a comment
-// @Description Create a new comment for a blog
-// @Tags Comments
-// @Accept json
-// @Produce json
-// @Param comment body models.Comment true "Comment payload"
-// @Success 201 {object} models.Comment
-// @Failure 400 {object} map[string]string "bad request"
-// @Router /comments [post]
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	var cmt models.Comment
 	if err := c.ShouldBindJSON(&cmt); err != nil {
@@ -52,17 +42,6 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
-// ListComments godoc
-// @Summary List comments for a blog
-// @Description List comments for a given blog with optional pagination
-// @Tags Comments
-// @Produce json
-// @Param blog_id path string true "Blog ID"
-// @Param limit query int false "Limit (default 10)"
-// @Param skip query int false "Skip (default 0)"
-// @Success 200 {array} models.Comment
-// @Failure 400 {object} map[string]string "invalid blog id"
-// @Router /comments/{blog_id} [get]
 func (h *CommentHandler) ListComments(c *gin.Context) {
 	blogIDStr := c.Param("blog_id")
 	blogID, err := primitive.ObjectIDFromHex(blogIDStr)
@@ -83,17 +62,6 @@ func (h *CommentHandler) ListComments(c *gin.Context) {
 	c.JSON(http.StatusOK, comments)
 }
 
-// LikeComment godoc
-// @Summary Like a comment
-// @Description Like a comment by username. One like per username only.
-// @Tags Comments
-// @Accept json
-// @Produce json
-// @Param id path string true "Comment ID"
-// @Param body body object{username=string} true "Username liking the comment"
-// @Success 200 {object} models.Comment
-// @Failure 400 {object} map[string]string "bad request or already liked"
-// @Router /comments/{id}/like [post]
 func (h *CommentHandler) LikeComment(c *gin.Context) {
 	commentIDStr := c.Param("id")
 	commentID, err := primitive.ObjectIDFromHex(commentIDStr)

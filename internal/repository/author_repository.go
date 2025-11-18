@@ -25,43 +25,43 @@ func NewAuthorRepository(db *mongo.Database) *AuthorRepository {
 }
 
 // CreateAuthor inserts a new author into the DB
-func (r *AuthorRepository) CreateAuthor(author *models.Author) (*models.Author, error) {
+func (r *AuthorRepository) CreateAuthor(a *author.Author) (*author.Author, error) {
     now := time.Now()
-    author.ID = primitive.NewObjectID()
-    author.CreatedAt = now
-    author.UpdatedAt = now
+    a.ID = primitive.NewObjectID()
+    a.CreatedAt = now
+    a.UpdatedAt = now
 
-    _, err := r.collection.InsertOne(context.Background(), author)
+    _, err := r.collection.InsertOne(context.Background(), a)
     if err != nil {
         return nil, err
     }
-    return author, nil
+    return a, nil
 }
 
 // GetAuthorByID finds an author by ID
-func (r *AuthorRepository) GetAuthorByID(id primitive.ObjectID) (*models.Author, error) {
-    var author models.Author
-    err := r.collection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&author)
+func (r *AuthorRepository) GetAuthorByID(id primitive.ObjectID) (*author.Author, error) {
+    var a author.Author
+    err := r.collection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&a)
     if err != nil {
         if errors.Is(err, mongo.ErrNoDocuments) {
             return nil, nil
         }
         return nil, err
     }
-    return &author, nil
+    return &a, nil
 }
 
 // GetAuthorByEmail finds an author by email (useful for login)
-func (r *AuthorRepository) GetAuthorByEmail(email string) (*models.Author, error) {
-    var author models.Author
-    err := r.collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&author)
+func (r *AuthorRepository) GetAuthorByEmail(email string) (*author.Author, error) {
+    var a author.Author
+    err := r.collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&a)
     if err != nil {
         if errors.Is(err, mongo.ErrNoDocuments) {
             return nil, nil
         }
         return nil, err
     }
-    return &author, nil
+    return &a, nil
 }
 
 // UpdateAuthor updates an existing author
