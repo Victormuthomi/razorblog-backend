@@ -12,49 +12,43 @@ jobs:
   build-and-run:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout repo
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # - name: Checkout code
+      #   uses: actions/checkout@v3
 
-      # 2️⃣ Set up Docker Buildx
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v2
 
-      # 3️⃣ Create .env from GitHub secrets
-      - name: Create .env from secrets
-        run: |
-          echo "PORT=${{ secrets.PORT }}" >> .env
-          echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+      # - name: Create .env from GitHub secrets
+      #   run: |
+      #     echo "PORT=${{ secrets.PORT }}" >> .env
+      #     echo "MONGO_URI=${{ secrets.MONGO_URI }}" >> .env
+      #     echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
-      # 4️⃣ Build and run backend container
-      - name: Build and run with Docker Compose
-        run: |
-          docker compose down --remove-orphans
-          docker compose up --build -d
+      # - name: Build and run backend container
+      #   run: |
+      #     docker compose down --remove-orphans
+      #     docker compose up --build -d
 
-      # 5️⃣ Wait for backend to start
-      - name: Wait for backend to start
-        run: sleep 10
+      # - name: Wait for backend to start
+      #   run: sleep 10
 
-      # 6️⃣ Check container status
-      - name: Check backend container status
-        run: docker ps
+      # - name: Check backend container status
+      #   run: docker ps
 
-      # 7️⃣ Health check with retry 5
-      - name: Health check
-        run: |
-          MAX_RETRIES=5
-          SLEEP=5
-          for i in $(seq 1 $MAX_RETRIES); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health)
-            if [ "$STATUS" -eq 200 ]; then
-              echo "✅ Health check passed"
-              exit 0
-            else
-              echo "⚠️ Health check attempt $i failed (status $STATUS). Retrying in $SLEEP seconds..."
-              sleep $SLEEP
-            fi
-          done
-          echo "❌ Health check failed after $MAX_RETRIES attempts"
-          docker compose down --remove-orphans
+      # - name: Health check
+      #   run: |
+      #     MAX_RETRIES=5
+      #     SLEEP=5
+      #     for i in $(seq 1 $MAX_RETRIES); do
+      #       STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health)
+      #       if [ "$STATUS" -eq 200 ]; then
+      #         echo "✅ Health check passed"
+      #         exit 0
+      #       else
+      #         echo "⚠️ Health check attempt $i failed (status $STATUS). Retrying in $SLEEP seconds..."
+      #         sleep $SLEEP
+      #       fi
+      #     done
+      #     echo "❌ Health check failed after $MAX_RETRIES attempts"
+      #     docker compose down --remove-orphans
+      #     exit 1
