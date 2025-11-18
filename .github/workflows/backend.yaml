@@ -41,7 +41,7 @@ jobs:
       - name: Check backend container status
         run: docker ps
 
-      # 7️⃣ Health check with retry
+      # 7️⃣ Health check with retry 5
       - name: Health check
         run: |
           MAX_RETRIES=5
