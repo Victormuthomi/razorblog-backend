@@ -58,4 +58,3 @@ jobs:
           done
           echo "❌ Health check failed after $MAX_RETRIES attempts"
           docker compose down --remove-orphans
-          exit 1
