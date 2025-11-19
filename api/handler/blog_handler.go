@@ -13,11 +13,15 @@ import (
 )
 
 type BlogHandler struct {
-	repo *repository.BlogRepository
+	repo       *repository.BlogRepository
+	authorRepo *repository.AuthorRepository
 }
 
-func NewBlogHandler(repo *repository.BlogRepository) *BlogHandler {
-	return &BlogHandler{repo: repo}
+func NewBlogHandler(repo *repository.BlogRepository, authorRepo *repository.AuthorRepository) *BlogHandler {
+	return &BlogHandler{
+		repo:       repo,
+		authorRepo: authorRepo,
+	}
 }
 
 // CreateBlog godoc
@@ -87,7 +91,16 @@ func (h *BlogHandler) GetBlog(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, b)
+	// Fetch author name using GetAuthorByID
+	name := ""
+	if authorData, err := h.authorRepo.GetAuthorByID(b.AuthorID); err == nil && authorData != nil {
+		name = authorData.Name
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"blog":       b,
+		"authorName": name,
+	})
 }
 
 // UpdateBlog godoc
@@ -178,9 +191,21 @@ func (h *BlogHandler) ListBlogs(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, blogs)
-}
+	// Include author names
+	result := make([]gin.H, 0, len(blogs))
+	for _, b := range blogs {
+		name := ""
+		if authorData, err := h.authorRepo.GetAuthorByID(b.AuthorID); err == nil && authorData != nil {
+			name = authorData.Name
+		}
+		result = append(result, gin.H{
+			"blog":       b,
+			"authorName": name,
+		})
+	}
 
+	c.JSON(http.StatusOK, result)
+}
 
 // LikeBlog godoc
 // @Summary Like a blog
@@ -202,7 +227,7 @@ func (h *BlogHandler) LikeBlog(c *gin.Context) {
 		return
 	}
 
-	userIDStr, exists := c.Get("author_id") // assuming same auth middleware
+	userIDStr, exists := c.Get("author_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return

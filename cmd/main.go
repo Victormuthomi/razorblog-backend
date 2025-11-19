@@ -5,11 +5,13 @@ import (
     "razorblog-backend/api"
     "razorblog-backend/configs"
     "razorblog-backend/internal/database"
+    "time"
 
+    "github.com/gin-contrib/cors"
     "github.com/gin-gonic/gin"
     ginSwagger "github.com/swaggo/gin-swagger"
     swaggerFiles "github.com/swaggo/files"
-  _ "razorblog-backend/swagger"
+    _ "razorblog-backend/swagger"
 )
 
 // @title RazorBlog API
@@ -51,6 +53,16 @@ func main() {
 
     // Initialize Gin router
     r := gin.Default()
+
+    // ⚡ CORS middleware
+    r.Use(cors.New(cors.Config{
+        AllowOrigins:     []string{"http://localhost:5173", "https://razorbill-website.vercel.app"},
+        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+        ExposeHeaders:    []string{"Content-Length"},
+        AllowCredentials: true,
+        MaxAge:           12 * time.Hour,
+    }))
 
     // Register application routes (Authors, Blogs, Comments, Shares)
     api.RegisterRoutes(r, client)

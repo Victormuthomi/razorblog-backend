@@ -84,7 +84,8 @@ r.GET("/health", func(c *gin.Context) {
 
 	// ===== Blog Routes =====
 	blogRepo := repository.NewBlogRepository(db)
-	blogHandler := handler.NewBlogHandler(blogRepo)
+  blogHandler := handler.NewBlogHandler(blogRepo, authorRepo) // pass authorRepo too
+
 
 	// Public Blog routes
 	r.GET("/blogs", blogHandler.ListBlogs)
