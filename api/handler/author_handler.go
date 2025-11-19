@@ -127,7 +127,7 @@ func (h *AuthorHandler) LoginAuthor(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]string{"token": tokenString})
+	c.JSON(http.StatusOK, map[string]string{"token": tokenString, "authorId": authorObj.ID.Hex()})
 }
 
 // GetAuthor godoc
