@@ -285,3 +285,45 @@ func (h *BlogHandler) UnlikeBlog(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "blog unliked"})
 }
 
+// GetBlogsByAuthor godoc
+// @Summary List blogs for a specific author
+// @Description Retrieves all blogs created by the given author ID
+// @Tags Blogs
+// @Produce json
+// @Param author_id path string true "Author ID"
+// @Success 200 {array} blog.Blog
+// @Failure 400 {object} map[string]string
+// @Router /blogs/author/{author_id} [get]
+func (h *BlogHandler) GetBlogsByAuthor(c *gin.Context) {
+	authorParam := c.Param("author_id")
+
+	authorID, err := primitive.ObjectIDFromHex(authorParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid author ID"})
+		return
+	}
+
+	blogs, err := h.repo.ListByAuthor(context.Background(), authorID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Attach author name
+	name := ""
+	if authorData, err := h.authorRepo.GetAuthorByID(authorID); err == nil && authorData != nil {
+		name = authorData.Name
+	}
+
+	result := make([]gin.H, 0, len(blogs))
+	for _, b := range blogs {
+		result = append(result, gin.H{
+			"blog":       b,
+			"authorName": name,
+		})
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
+

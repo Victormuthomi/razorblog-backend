@@ -89,6 +89,7 @@ r.GET("/health", func(c *gin.Context) {
 
 	// Public Blog routes
 	r.GET("/blogs", blogHandler.ListBlogs)
+  r.GET("/blogs/author/:author_id", blogHandler.GetBlogsByAuthor)
 	r.GET("/blogs/:id", blogHandler.GetBlog)
 
 	// Protected Blog routes

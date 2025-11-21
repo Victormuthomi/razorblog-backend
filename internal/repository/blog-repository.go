@@ -148,3 +148,27 @@ func (r *BlogRepository) UnlikeBlog(ctx context.Context, blogID, userID primitiv
 	return err
 }
 
+//Getting a blog by author Id
+func (r *BlogRepository) ListByAuthor(ctx context.Context, authorID primitive.ObjectID) ([]*blog.Blog, error) {
+	cursor, err := r.collection.Find(
+		ctx,
+		bson.M{"author_id": authorID},
+		options.Find().SetSort(bson.M{"created_at": -1}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var blogs []*blog.Blog
+	for cursor.Next(ctx) {
+		var b blog.Blog
+		if err := cursor.Decode(&b); err != nil {
+			return nil, err
+		}
+		blogs = append(blogs, &b)
+	}
+
+	return blogs, nil
+}
+
