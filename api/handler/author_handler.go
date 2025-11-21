@@ -228,3 +228,26 @@ func (h *AuthorHandler) DeleteAuthor(c *gin.Context) {
 	c.JSON(http.StatusOK, map[string]string{"message": "author deleted"})
 }
 
+// GetPublicAuthor returns author info for public viewing
+func (h *AuthorHandler) GetPublicAuthor(c *gin.Context) {
+	idParam := c.Param("id")
+	objID, err := primitive.ObjectIDFromHex(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid author id"})
+		return
+	}
+
+	authorObj, err := h.Repo.GetAuthorByID(objID)
+	if err != nil || authorObj == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "author not found"})
+		return
+	}
+
+	// Hide sensitive info
+	authorObj.Password = ""
+	authorObj.Email = ""
+	authorObj.Phone = ""
+
+	c.JSON(http.StatusOK, gin.H{"author": authorObj})
+}
+

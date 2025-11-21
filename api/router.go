@@ -72,6 +72,8 @@ r.GET("/health", func(c *gin.Context) {
 	// Public Author routes
 	r.POST("/authors/register", authorHandler.RegisterAuthor)
 	r.POST("/authors/login", authorHandler.LoginAuthor)
+  r.GET("/authors/public/:id", authorHandler.GetPublicAuthor)
+
 
 	// Protected Author routes
 	authMiddleware := middleware.AuthMiddleware()
