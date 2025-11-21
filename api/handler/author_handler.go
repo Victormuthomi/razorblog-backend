@@ -27,17 +27,6 @@ func NewAuthorHandler(repo *repository.AuthorRepository) *AuthorHandler {
 }
 
 // RegisterAuthor godoc
-// @Summary Register a new author
-// @Description Creates a new author account
-// @Tags Authors
-// @Accept json
-// @Produce json
-// @Param author body map[string]string true "Author info (name, email, phone, password)"
-// @Success 201 {object} map[string]interface{}
-// @Failure 400 {object} map[string]string
-// @Failure 409 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /authors/register [post]
 func (h *AuthorHandler) RegisterAuthor(c *gin.Context) {
 	var req struct {
 		Name     string `json:"name" binding:"required"`
@@ -83,17 +72,6 @@ func (h *AuthorHandler) RegisterAuthor(c *gin.Context) {
 }
 
 // LoginAuthor godoc
-// @Summary Author login
-// @Description Logs in an author and returns JWT token
-// @Tags Authors
-// @Accept json
-// @Produce json
-// @Param credentials body map[string]string true "Login credentials (email, password)"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /authors/login [post]
 func (h *AuthorHandler) LoginAuthor(c *gin.Context) {
 	var req struct {
 		Email    string `json:"email" binding:"required,email"`
@@ -131,63 +109,46 @@ func (h *AuthorHandler) LoginAuthor(c *gin.Context) {
 }
 
 // GetAuthor godoc
-// @Summary Get author by ID
-// @Description Retrieves an author by their ID
-// @Tags Authors
-// @Produce json
-// @Param id path string true "Author ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Router /authors/{id} [get]
+// Private profile: returns all info
 func (h *AuthorHandler) GetAuthor(c *gin.Context) {
 	idParam := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
 	authorObj, err := h.Repo.GetAuthorByID(objID)
 	if err != nil || authorObj == nil {
-		c.JSON(http.StatusNotFound, map[string]string{"error": "author not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "author not found"})
 		return
 	}
 
+	// hide password only
 	authorObj.Password = ""
-	c.JSON(http.StatusOK, map[string]interface{}{"author": authorObj})
+
+	c.JSON(http.StatusOK, gin.H{"author": authorObj})
 }
 
 // UpdateAuthor godoc
-// @Summary Update an author
-// @Description Updates an author's info
-// @Tags Authors
-// @Accept json
-// @Produce json
-// @Param id path string true "Author ID"
-// @Param author body object true "Updated fields (name, email, phone, password)"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /authors/{id} [put]
 func (h *AuthorHandler) UpdateAuthor(c *gin.Context) {
 	idParam := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
 	var update map[string]interface{}
 	if err := c.ShouldBindJSON(&update); err != nil {
-		c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if pwd, ok := update["password"].(string); ok && pwd != "" {
 		hashedPwd, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to hash password"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
 			return
 		}
 		update["password"] = string(hashedPwd)
@@ -195,40 +156,32 @@ func (h *AuthorHandler) UpdateAuthor(c *gin.Context) {
 
 	update["updated_at"] = time.Now()
 	if err := h.Repo.UpdateAuthor(objID, update); err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]string{"message": "author updated"})
+	c.JSON(http.StatusOK, gin.H{"message": "author updated"})
 }
 
 // DeleteAuthor godoc
-// @Summary Delete an author
-// @Description Deletes an author by ID
-// @Tags Authors
-// @Produce json
-// @Param id path string true "Author ID"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /authors/{id} [delete]
 func (h *AuthorHandler) DeleteAuthor(c *gin.Context) {
 	idParam := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
 	if err := h.Repo.DeleteAuthor(objID); err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]string{"message": "author deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "author deleted"})
 }
 
-// GetPublicAuthor returns author info for public viewing
+// GetPublicAuthor godoc
+// Public profile: only image, name, bio
 func (h *AuthorHandler) GetPublicAuthor(c *gin.Context) {
 	idParam := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(idParam)
@@ -243,10 +196,11 @@ func (h *AuthorHandler) GetPublicAuthor(c *gin.Context) {
 		return
 	}
 
-	// Hide sensitive info
+	// Hide sensitive info for public
 	authorObj.Password = ""
 	authorObj.Email = ""
 	authorObj.Phone = ""
+	authorObj.CreatedAt = time.Time{} // optional: hide join date
 
 	c.JSON(http.StatusOK, gin.H{"author": authorObj})
 }
