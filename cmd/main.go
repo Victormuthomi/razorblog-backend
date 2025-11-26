@@ -25,6 +25,7 @@ func main() {
     }
     log.Println("✅ Successfully connected to MongoDB")
 
+    // Ensure MongoDB disconnects on exit
     defer func() {
         if err := client.Disconnect(database.Ctx); err != nil {
             log.Printf("⚠️ Error disconnecting MongoDB: %v", err)
@@ -36,34 +37,15 @@ func main() {
     // Initialize Gin router
     r := gin.Default()
 
-    // ⚡ CORS middleware
+    // ⚡ CORS middleware - allow all origins (testing only!)
     r.Use(cors.New(cors.Config{
-        AllowOrigins: []string{
-            "http://localhost:5173",                    // dev frontend
-            "https://razorbill-website.vercel.app",    // prod frontend
-            "https://muthomivictor.vercel.app",        // prod frontend mirror
-            "capacitor://localhost",  // Capacitor default origin
-            "http://localhost",       // sometimes used in webview fetches
-            "https://localhost",
-        },
+        AllowAllOrigins:  true, // ⚠️ Only for testing!
         AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
         AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
         ExposeHeaders:    []string{"Content-Length"},
         AllowCredentials: true,
         MaxAge:           12 * time.Hour,
-        // Custom origin function for Capacitor apps
-        AllowOriginFunc: func(origin string) bool {
-            if origin == "" {
-                return true // allow native apps without origin header
-            }
-            // allow capacitor://localhost specifically
-            if origin == "capacitor://localhost" {
-                return true
-            }
-            return false
-        },
     }))
-
 
     // Register main API routes (Authors, Blogs, Comments, Shares)
     api.RegisterRoutes(r, client)
@@ -71,7 +53,7 @@ func main() {
     // Swagger UI route
     r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-    // Start server
+    // Start HTTP server
     log.Printf("🚀 Server running on port %s", cfg.Port)
     if err := r.Run(":" + cfg.Port); err != nil {
         log.Fatalf("❌ Failed to start server: %v", err)
