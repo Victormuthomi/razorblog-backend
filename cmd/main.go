@@ -44,7 +44,7 @@ func main() {
             "https://muthomivictor.vercel.app",        // prod frontend mirror
             "capacitor://localhost",  // Capacitor default origin
             "http://localhost",       // sometimes used in webview fetches
-            "https://localhost" 
+            "https://localhost",
         },
         AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
         AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
