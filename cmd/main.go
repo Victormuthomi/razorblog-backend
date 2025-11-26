@@ -42,6 +42,9 @@ func main() {
             "http://localhost:5173",                    // dev frontend
             "https://razorbill-website.vercel.app",    // prod frontend
             "https://muthomivictor.vercel.app",        // prod frontend mirror
+            "capacitor://localhost",  // Capacitor default origin
+            "http://localhost",       // sometimes used in webview fetches
+            "https://localhost" 
         },
         AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
         AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
