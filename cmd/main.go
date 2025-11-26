@@ -61,10 +61,6 @@ func main() {
         },
     }))
 
-    // Optional health check route
-    r.GET("/health", func(c *gin.Context) {
-        c.JSON(200, gin.H{"status": "ok", "time": time.Now()})
-    })
 
     // Register main API routes (Authors, Blogs, Comments, Shares)
     api.RegisterRoutes(r, client)
