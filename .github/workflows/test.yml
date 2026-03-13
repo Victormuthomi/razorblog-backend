@@ -1,26 +1,26 @@
 name: CI Security Gatekeeper
 
 on:
-	push:
-		branches: [ master ]
-	pull_request:
-		branches: [ master ]
+  push:
+    branches: [master, RBAC]
+  pull_request:
+    branches: [master, RBAC]
 
 jobs:
-	run-tests:
-		runs-on: ubuntu-latest
-		steps:
-			- name: Checkout code
-				uses: actions/checkout@v4
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-			- name: Set up Go
-				uses: actions/setup-go@v5
-				with:
-					go-version: '1.24'
-					cache: true # Speeds up future runs by caching dependencies
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: true
 
-			- name: Install dependencies
-				run: go mod tidy
+      - name: Install dependencies
+        run: go mod tidy
 
-			- name: Execute RBAC & Security Tests
-				run: go test -v ./api/handler/...
+      - name: Execute RBAC & Security Tests
+        run: go test -v ./api/handler/...
