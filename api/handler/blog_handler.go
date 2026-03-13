@@ -12,16 +12,18 @@ import (
 	"razorblog-backend/internal/repository"
 )
 
+// BlogHandler now uses interfaces instead of concrete structs
 type BlogHandler struct {
-	repo       *repository.BlogRepository
-	authorRepo *repository.AuthorRepository
+    repo       repository.IBlogRepository   // Swapped
+    authorRepo repository.IAuthorRepository // Swapped
 }
 
-func NewBlogHandler(repo *repository.BlogRepository, authorRepo *repository.AuthorRepository) *BlogHandler {
-	return &BlogHandler{
-		repo:       repo,
-		authorRepo: authorRepo,
-	}
+// NewBlogHandler now accepts interfaces
+func NewBlogHandler(repo repository.IBlogRepository, authorRepo repository.IAuthorRepository) *BlogHandler {
+    return &BlogHandler{
+        repo:       repo,
+        authorRepo: authorRepo,
+    }
 }
 
 // CreateBlog godoc
@@ -37,32 +39,51 @@ func NewBlogHandler(repo *repository.BlogRepository, authorRepo *repository.Auth
 // @Failure 500 {object} map[string]string
 // @Router /blogs [post]
 func (h *BlogHandler) CreateBlog(c *gin.Context) {
-	var b blog.Blog
-	if err := c.ShouldBindJSON(&b); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    var b blog.Blog
+    if err := c.ShouldBindJSON(&b); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	authorID, exists := c.Get("author_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
+    // 1. Get Author ID from Middleware
+    authorID, exists := c.Get("author_id")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+        return
+    }
 
-	objID, err := primitive.ObjectIDFromHex(authorID.(string))
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid author ID"})
-		return
-	}
-	b.AuthorID = objID
+    objID, err := primitive.ObjectIDFromHex(authorID.(string))
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid author ID"})
+        return
+    }
+    b.AuthorID = objID
 
-	created, err := h.repo.Create(context.Background(), &b)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+    // 2. DEFENSIVE CHECK: RBAC vs Content Type
+    // If attempting to post a TDD or Case Study, verify the role
+    if b.Type == blog.TypeTDD || b.Type == blog.TypeCaseStudy {
+        author, err := h.authorRepo.GetAuthorByID(objID)
+        if err != nil || author == nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "author not found"})
+            return
+        }
 
-	c.JSON(http.StatusCreated, created)
+        if author.Role != "founder" {
+            c.JSON(http.StatusForbidden, gin.H{
+                "error": "unauthorized: guests can only publish standard blogs",
+            })
+            return
+        }
+    }
+
+    // 3. Save to Repository
+    created, err := h.repo.Create(context.Background(), &b)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusCreated, created)
 }
 
 // GetBlog godoc
@@ -116,33 +137,38 @@ func (h *BlogHandler) GetBlog(c *gin.Context) {
 // @Failure 404 {object} map[string]string
 // @Router /blogs/{id} [put]
 func (h *BlogHandler) UpdateBlog(c *gin.Context) {
-	id := c.Param("id")
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid blog ID"})
-		return
-	}
+    id := c.Param("id")
+    objID, err := primitive.ObjectIDFromHex(id)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid blog ID"})
+        return
+    }
 
-	var b blog.Blog
-	if err := c.ShouldBindJSON(&b); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    var b blog.Blog
+    if err := c.ShouldBindJSON(&b); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	update := map[string]interface{}{
-		"title":     b.Title,
-		"content":   b.Content,
-		"image_url": b.ImageURL,
-		"category":  b.Category,
-	}
+    // Surgical Update: Include the new 'type' field
+    update := map[string]interface{}{
+        "title":     b.Title,
+        "content":   b.Content,
+        "image_url": b.ImageURL,
+        "category":  b.Category,
+        "type":      b.Type, // Added this
+    }
 
-	updated, err := h.repo.Update(context.Background(), objID, update)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "blog not found"})
-		return
-	}
+    // Optional: You can add the same RBAC check here if you want to prevent
+    // guests from "upgrading" an existing blog to a TDD.
+    
+    updated, err := h.repo.Update(context.Background(), objID, update)
+    if err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "blog not found"})
+        return
+    }
 
-	c.JSON(http.StatusOK, updated)
+    c.JSON(http.StatusOK, updated)
 }
 
 // DeleteBlog godoc
@@ -195,12 +221,15 @@ func (h *BlogHandler) ListBlogs(c *gin.Context) {
 	result := make([]gin.H, 0, len(blogs))
 	for _, b := range blogs {
 		name := ""
+		role := ""
 		if authorData, err := h.authorRepo.GetAuthorByID(b.AuthorID); err == nil && authorData != nil {
 			name = authorData.Name
+			role = string(authorData.Role) // Get the role from the DB
 		}
 		result = append(result, gin.H{
 			"blog":       b,
 			"authorName": name,
+			"authorRole": role,
 		})
 	}
 

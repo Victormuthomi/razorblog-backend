@@ -18,14 +18,15 @@ var jwtSecret = []byte("supersecretkey")
 
 // AuthorHandler holds repository reference
 type AuthorHandler struct {
-	Repo *repository.AuthorRepository
+    Repo repository.IAuthorRepository // Change this to the Interface
 }
 
 // NewAuthorHandler creates a new AuthorHandler
-func NewAuthorHandler(repo *repository.AuthorRepository) *AuthorHandler {
-	return &AuthorHandler{Repo: repo}
+func NewAuthorHandler(repo repository.IAuthorRepository) *AuthorHandler { // Change this too
+    return &AuthorHandler{Repo: repo}
 }
 
+// RegisterAuthor godoc
 // RegisterAuthor godoc
 func (h *AuthorHandler) RegisterAuthor(c *gin.Context) {
 	var req struct {
@@ -57,6 +58,8 @@ func (h *AuthorHandler) RegisterAuthor(c *gin.Context) {
 		Email:     req.Email,
 		Phone:     req.Phone,
 		Password:  string(hashedPwd),
+		// Explicitly set role to guest to prevent privilege escalation
+		Role:      author.RoleGuest, 
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -67,45 +70,54 @@ func (h *AuthorHandler) RegisterAuthor(c *gin.Context) {
 		return
 	}
 
+	// Sanitize output
 	created.Password = ""
 	c.JSON(http.StatusCreated, map[string]interface{}{"author": created})
 }
 
 // LoginAuthor godoc
+// LoginAuthor godoc
 func (h *AuthorHandler) LoginAuthor(c *gin.Context) {
-	var req struct {
-		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required"`
-	}
+    var req struct {
+        Email    string `json:"email" binding:"required,email"`
+        Password string `json:"password" binding:"required"`
+    }
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-		return
-	}
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+        return
+    }
 
-	authorObj, err := h.Repo.GetAuthorByEmail(req.Email)
-	if err != nil || authorObj == nil {
-		c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
-		return
-	}
+    authorObj, err := h.Repo.GetAuthorByEmail(req.Email)
+    if err != nil || authorObj == nil {
+        c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
+        return
+    }
 
-	if err := bcrypt.CompareHashAndPassword([]byte(authorObj.Password), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
-		return
-	}
+    if err := bcrypt.CompareHashAndPassword([]byte(authorObj.Password), []byte(req.Password)); err != nil {
+        c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
+        return
+    }
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"author_id": authorObj.ID.Hex(),
-		"exp":       time.Now().Add(72 * time.Hour).Unix(),
-	})
+    // Include the role in the JWT claims
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "author_id": authorObj.ID.Hex(),
+        "role":      authorObj.Role, // Added role to JWT
+        "exp":       time.Now().Add(72 * time.Hour).Unix(),
+    })
 
-	tokenString, err := token.SignedString(jwtSecret)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to generate token"})
-		return
-	}
+    tokenString, err := token.SignedString(jwtSecret)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to generate token"})
+        return
+    }
 
-	c.JSON(http.StatusOK, map[string]string{"token": tokenString, "authorId": authorObj.ID.Hex()})
+    // Return the role in the response for immediate frontend use (badges/UI)
+    c.JSON(http.StatusOK, map[string]interface{}{
+        "token":    tokenString,
+        "authorId": authorObj.ID.Hex(),
+        "role":     authorObj.Role, 
+    })
 }
 
 // GetAuthor godoc
@@ -145,6 +157,15 @@ func (h *AuthorHandler) UpdateAuthor(c *gin.Context) {
 		return
 	}
 
+	// --- SECURITY BLOCK: STRIP SENSITIVE FIELDS ---
+	// This ensures a guest cannot promote themselves to founder
+	// or change their unique ID via a PUT request.
+	delete(update, "role")
+	delete(update, "_id")
+	delete(update, "id")
+	delete(update, "email") // Usually, email updates should have a separate verified flow
+	// ----------------------------------------------
+
 	if pwd, ok := update["password"].(string); ok && pwd != "" {
 		hashedPwd, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 		if err != nil {
@@ -155,6 +176,7 @@ func (h *AuthorHandler) UpdateAuthor(c *gin.Context) {
 	}
 
 	update["updated_at"] = time.Now()
+	
 	if err := h.Repo.UpdateAuthor(objID, update); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
